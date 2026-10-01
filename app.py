@@ -117,6 +117,27 @@ st.markdown(
         [data-testid="stHeader"] {{ background: var(--app-bg); }}
         [data-testid="stMain"] {{ background: var(--app-bg); }}
         [data-testid="stSidebar"] {{ background: var(--sidebar-bg); }}
+        [data-testid="stToolbarActions"] button,
+        [data-testid="stToolbarActions"] a,
+        [data-testid="stMainMenuButton"] {{
+            color: var(--app-text) !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }}
+        [data-testid="stToolbarActions"] button *,
+        [data-testid="stToolbarActions"] a *,
+        [data-testid="stMainMenuButton"] * {{
+            color: var(--app-text) !important;
+            opacity: 1 !important;
+            fill: currentColor;
+            stroke: currentColor;
+        }}
+        [data-testid="stToolbarActions"] button:hover,
+        [data-testid="stToolbarActions"] a:hover,
+        [data-testid="stMainMenuButton"]:hover {{
+            background: var(--panel-bg) !important;
+            border-radius: 6px;
+        }}
         h1, h2, h3, p, label, [data-testid="stMarkdownContainer"] {{ color: var(--app-text); }}
         h1, h2, h3 {{ font-family: 'Manrope', sans-serif; letter-spacing: 0; }}
         h1 {{ font-size: 2.15rem !important; line-height: 1.2; }}
