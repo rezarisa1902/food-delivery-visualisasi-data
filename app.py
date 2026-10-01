@@ -58,6 +58,7 @@ if display_theme == "Dark":
             --border-color: #3b4a43;
             --metric-accent: #72b69d;
             --selected-bg: #1f6b57;
+            --toolbar-icon-filter: brightness(0) invert(1);
         }
         """
 elif display_theme == "Light":
@@ -73,6 +74,7 @@ elif display_theme == "Light":
             --border-color: #dce5dd;
             --metric-accent: #1f6b57;
             --selected-bg: #1f6b57;
+            --toolbar-icon-filter: none;
         }
         """
 else:
@@ -88,6 +90,7 @@ else:
             --border-color: #dce5dd;
             --metric-accent: #1f6b57;
             --selected-bg: #1f6b57;
+            --toolbar-icon-filter: none;
         }
         @media (prefers-color-scheme: dark) {
             :root {
@@ -100,6 +103,7 @@ else:
                 --border-color: #3b4a43;
                 --metric-accent: #72b69d;
                 --selected-bg: #1f6b57;
+                --toolbar-icon-filter: brightness(0) invert(1);
             }
         }
         """
@@ -131,7 +135,11 @@ st.markdown(
             opacity: 1 !important;
         }}
         [data-testid="stToolbarActions"] svg,
-        [data-testid="stMainMenuButton"] svg {{ color: var(--app-text) !important; }}
+        [data-testid="stMainMenuButton"] svg {{
+            color: var(--app-text) !important;
+            filter: var(--toolbar-icon-filter) !important;
+            opacity: 1 !important;
+        }}
         [data-testid="stToolbarActions"] button:hover,
         [data-testid="stToolbarActions"] a:hover,
         [data-testid="stMainMenuButton"]:hover {{
