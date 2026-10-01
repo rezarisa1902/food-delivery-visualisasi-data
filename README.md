@@ -52,7 +52,7 @@ Setelah deployment selesai, Streamlit Cloud memberikan URL publik yang dapat dib
 - `docs/laporan_analisis.md`: metode, temuan, batasan, dan rekomendasi.
 - `data/processed/`: artefak hasil cleaning setelah skrip dijalankan.
 
-Di dashboard, gunakan filter tanggal, kategori, status, dan promo. CSV hasil cleaning dapat diunduh melalui tombol di bagian bawah halaman.
+Di dashboard, gunakan filter tanggal, kategori, status, dan promo. Pemilih tema di kanan atas menyediakan Light, Dark, dan System; System mengikuti preferensi warna perangkat/browser. CSV hasil cleaning dapat diunduh melalui tombol di bagian bawah halaman.
 
 Untuk membuat berkas hasil cleaning di project, jalankan:
 

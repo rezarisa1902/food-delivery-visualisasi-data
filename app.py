@@ -29,18 +29,115 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
+title_column, theme_control = st.columns([5, 2], vertical_alignment="center")
+with title_column:
+    st.markdown("# Data to Insight · Food Delivery")
+    st.caption(
+        "Analisis operasional pesanan, waktu pengiriman, harga, dan pengalaman pelanggan "
+        "· Dataset sintetis, Januari–Desember 2024"
+    )
+with theme_control:
+        display_theme = st.segmented_control(
+                "Tampilan",
+                options=["Light", "Dark", "System"],
+                default="System",
+                label_visibility="collapsed",
+                key="display_theme",
+        )
+
+if display_theme == "Dark":
+        theme_css = """
+        :root {
+            color-scheme: dark;
+            --app-bg: #141c19;
+            --panel-bg: #1d2924;
+            --sidebar-bg: #18231f;
+            --app-text: #e5eee9;
+            --muted-text: #a5b6ae;
+            --grid-color: #3b4a43;
+            --border-color: #3b4a43;
+            --metric-accent: #72b69d;
+            --selected-bg: #1f6b57;
+        }
+        """
+elif display_theme == "Light":
+        theme_css = """
+        :root {
+            color-scheme: light;
+            --app-bg: #ffffff;
+            --panel-bg: #f1f5ef;
+            --sidebar-bg: #f1f5ef;
+            --app-text: #20352f;
+            --muted-text: #6d7d77;
+            --grid-color: #e7ece8;
+            --border-color: #dce5dd;
+            --metric-accent: #1f6b57;
+            --selected-bg: #1f6b57;
+        }
+        """
+else:
+        theme_css = """
+        :root {
+            color-scheme: light dark;
+            --app-bg: #ffffff;
+            --panel-bg: #f1f5ef;
+            --sidebar-bg: #f1f5ef;
+            --app-text: #20352f;
+            --muted-text: #6d7d77;
+            --grid-color: #e7ece8;
+            --border-color: #dce5dd;
+            --metric-accent: #1f6b57;
+            --selected-bg: #1f6b57;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --app-bg: #141c19;
+                --panel-bg: #1d2924;
+                --sidebar-bg: #18231f;
+                --app-text: #e5eee9;
+                --muted-text: #a5b6ae;
+                --grid-color: #3b4a43;
+                --border-color: #3b4a43;
+                --metric-accent: #72b69d;
+                --selected-bg: #1f6b57;
+            }
+        }
+        """
+
 st.markdown(
-    """
+        f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
-    html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
-    h1, h2, h3 { font-family: 'Manrope', sans-serif; color: #20352f; letter-spacing: 0; }
-    h1 { font-size: 2.15rem !important; line-height: 1.2; }
-    .block-container { padding-top: 2.1rem; padding-bottom: 3rem; max-width: 1440px; }
-    [data-testid="stMetric"] { background: #f1f5ef; padding: 16px 18px; border-radius: 6px; border-left: 3px solid #1f6b57; }
-    [data-testid="stMetricLabel"] { color: #6d7d77; }
-    [data-testid="stSidebar"] { background: #f1f5ef; }
-    div[data-testid="stExpander"] { border-color: #dce5dd; }
+        {theme_css}
+        html, body, [data-testid="stAppViewContainer"] {{
+            background: var(--app-bg) !important;
+            color: var(--app-text) !important;
+            font-family: 'DM Sans', sans-serif;
+        }}
+        [data-testid="stHeader"] {{ background: var(--app-bg); }}
+        [data-testid="stMain"] {{ background: var(--app-bg); }}
+        [data-testid="stSidebar"] {{ background: var(--sidebar-bg); }}
+        h1, h2, h3, p, label, [data-testid="stMarkdownContainer"] {{ color: var(--app-text); }}
+        h1, h2, h3 {{ font-family: 'Manrope', sans-serif; letter-spacing: 0; }}
+        h1 {{ font-size: 2.15rem !important; line-height: 1.2; }}
+        .block-container {{ padding-top: 4rem; padding-bottom: 3rem; max-width: 1440px; }}
+        [data-testid="stMetric"] {{ background: var(--panel-bg); padding: 16px 18px; border-radius: 6px; border-left: 3px solid var(--metric-accent); }}
+        [data-testid="stMetricLabel"], [data-testid="stCaptionContainer"] {{ color: var(--muted-text) !important; }}
+        div[data-testid="stExpander"] {{ border-color: var(--border-color); }}
+        [data-variant="segmented_control"] {{ color: var(--app-text); }}
+        [data-variant="segmented_control"][aria-checked="true"] {{
+            background: var(--selected-bg) !important;
+            color: #ffffff !important;
+        }}
+        [data-baseweb="select"] > div, [data-baseweb="input"] > div {{
+            background: var(--panel-bg);
+            color: var(--app-text);
+            border-color: var(--border-color);
+        }}
+        [data-baseweb="tag"] {{ background: var(--selected-bg); color: #ffffff; }}
+        [data-testid="stDataFrame"] {{ border-color: var(--border-color); }}
+        .js-plotly-plot .plotly text {{ fill: var(--app-text) !important; }}
+        .js-plotly-plot .plotly .xgrid, .js-plotly-plot .plotly .ygrid {{ stroke: var(--grid-color); }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -52,17 +149,22 @@ def get_data(path: str) -> pd.DataFrame:
     return clean_data(load_raw_data(path))
 
 
-def apply_plot_style(fig: go.Figure) -> go.Figure:
+def apply_plot_style(fig: go.Figure, dark_mode: bool) -> go.Figure:
+    text_color = "#e5eee9" if dark_mode else COLORS["ink"]
+    grid_color = "#3b4a43" if dark_mode else COLORS["grid"]
     fig.update_layout(
         margin=dict(l=12, r=12, t=28, b=12),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="DM Sans, sans-serif", color=COLORS["ink"]),
+        font=dict(family="DM Sans, sans-serif", color=text_color),
         legend_title_text="",
     )
-    fig.update_xaxes(showgrid=False, linecolor=COLORS["grid"])
-    fig.update_yaxes(gridcolor=COLORS["grid"], zeroline=False)
+    fig.update_xaxes(showgrid=False, linecolor=grid_color, tickfont_color=text_color, title_font_color=text_color)
+    fig.update_yaxes(gridcolor=grid_color, zeroline=False, tickfont_color=text_color, title_font_color=text_color)
     return fig
+
+
+dark_charts = display_theme == "Dark"
 
 
 if not DATA_PATH.exists():
@@ -113,11 +215,6 @@ if promo_filter == "Dengan promo":
 elif promo_filter == "Tanpa promo":
     filtered = filtered.loc[filtered["Status_Promo"].eq(False)]
 
-st.markdown("# Data to Insight · Food Delivery")
-st.caption(
-    "Analisis operasional pesanan, waktu pengiriman, harga, dan pengalaman pelanggan "
-    "· Dataset sintetis, Januari–Desember 2024"
-)
 st.divider()
 
 if filtered.empty:
@@ -154,7 +251,7 @@ with left:
         markers=True,
         color_discrete_sequence=[COLORS["green"]],
     )
-    st.plotly_chart(apply_plot_style(figure), width="stretch")
+    st.plotly_chart(apply_plot_style(figure, dark_charts), width="stretch")
 
 with right:
     st.subheader("2 · Kategori mana yang paling banyak dipesan?")
@@ -173,7 +270,7 @@ with right:
         color_continuous_scale=[COLORS["lime"], COLORS["green"]],
     )
     figure.update_layout(coloraxis_showscale=False)
-    st.plotly_chart(apply_plot_style(figure), width="stretch")
+    st.plotly_chart(apply_plot_style(figure, dark_charts), width="stretch")
 
 left, right = st.columns(2)
 with left:
@@ -188,7 +285,7 @@ with left:
     )
     figure.update_layout(showlegend=False)
     figure.update_yaxes(title="Waktu tunggu (menit)")
-    st.plotly_chart(apply_plot_style(figure), width="stretch")
+    st.plotly_chart(apply_plot_style(figure, dark_charts), width="stretch")
 
 with right:
     st.subheader("4 · Apakah jarak kirim berkaitan dengan waktu tunggu?")
@@ -203,7 +300,7 @@ with right:
     )
     figure.update_xaxes(title="Jarak kirim (km)")
     figure.update_yaxes(title="Waktu tunggu (menit)")
-    st.plotly_chart(apply_plot_style(figure), width="stretch")
+    st.plotly_chart(apply_plot_style(figure, dark_charts), width="stretch")
 
 left, right = st.columns(2)
 with left:
@@ -218,7 +315,7 @@ with left:
     )
     figure.update_xaxes(title="Rating (1–5)", dtick=1)
     figure.update_yaxes(title="Jumlah rating")
-    st.plotly_chart(apply_plot_style(figure), width="stretch")
+    st.plotly_chart(apply_plot_style(figure, dark_charts), width="stretch")
 
 with right:
     st.subheader("6 · Kapan waktu tunggu rata-rata paling tinggi?")
@@ -235,7 +332,7 @@ with right:
         color_continuous_scale=["#edf3e8", COLORS["gold"], COLORS["coral"]],
         aspect="auto",
     )
-    st.plotly_chart(apply_plot_style(figure), width="stretch")
+    st.plotly_chart(apply_plot_style(figure, dark_charts), width="stretch")
 
 with st.expander("Kualitas data dan hasil cleaning"):
     quality_columns = st.columns(4)
