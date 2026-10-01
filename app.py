@@ -124,7 +124,11 @@ st.markdown(
         [data-testid="stMetric"] {{ background: var(--panel-bg); padding: 16px 18px; border-radius: 6px; border-left: 3px solid var(--metric-accent); }}
         [data-testid="stMetricLabel"], [data-testid="stCaptionContainer"] {{ color: var(--muted-text) !important; }}
         div[data-testid="stExpander"] {{ border-color: var(--border-color); }}
-        [data-variant="segmented_control"] {{ color: var(--app-text); }}
+        [data-variant="segmented_control"] {{
+            background: var(--panel-bg) !important;
+            color: var(--muted-text) !important;
+            border-color: var(--border-color) !important;
+        }}
         [data-variant="segmented_control"][aria-checked="true"] {{
             background: var(--selected-bg) !important;
             color: #ffffff !important;
@@ -135,7 +139,27 @@ st.markdown(
             color: var(--app-text);
             border-color: var(--border-color);
         }}
+        [data-testid="stDateInputField"],
+        [data-testid="stMultiSelect"] > div [role="group"],
+        [data-testid="stSelectbox"] [role="group"] {{
+            background: var(--panel-bg) !important;
+            color: var(--app-text) !important;
+            border-color: var(--border-color) !important;
+        }}
+        [data-testid="stDateInputField"] input {{
+            background: var(--panel-bg) !important;
+            color: var(--app-text) !important;
+        }}
+        [data-testid="stDateInputField"] *,
+        [data-testid="stSelectbox"] [role="group"] * {{ color: var(--app-text) !important; }}
+        [data-testid="stMultiSelect"] [role="group"] * {{ color: var(--app-text) !important; }}
+        [data-testid="stMultiSelect"] [data-tag],
+        [data-testid="stMultiSelect"] [data-tag] * {{ color: #ffffff !important; }}
         [data-baseweb="tag"] {{ background: var(--selected-bg); color: #ffffff; }}
+        [role="listbox"], [role="option"], [role="dialog"] {{
+            background: var(--panel-bg);
+            color: var(--app-text);
+        }}
         [data-testid="stDataFrame"] {{ border-color: var(--border-color); }}
         .js-plotly-plot .plotly text {{ fill: var(--app-text) !important; }}
         .js-plotly-plot .plotly .xgrid, .js-plotly-plot .plotly .ygrid {{ stroke: var(--grid-color); }}
