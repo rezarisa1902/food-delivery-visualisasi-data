@@ -121,9 +121,8 @@ st.markdown(
         [data-testid="stHeader"] {{ background: var(--app-bg); }}
         [data-testid="stMain"] {{ background: var(--app-bg); }}
         [data-testid="stSidebar"] {{ background: var(--sidebar-bg); }}
-        [data-testid="stToolbarActions"] button,
-        [data-testid="stToolbarActions"] a,
-        [data-testid="stMainMenuButton"] {{
+        [data-testid="stHeader"] button,
+        [data-testid="stHeader"] a {{
             color: var(--app-text) !important;
             opacity: 1 !important;
             filter: none !important;
@@ -134,15 +133,13 @@ st.markdown(
             color: var(--app-text) !important;
             opacity: 1 !important;
         }}
-        [data-testid="stToolbarActions"] svg,
-        [data-testid="stMainMenuButton"] svg {{
+        [data-testid="stHeader"] svg {{
             color: var(--app-text) !important;
             filter: var(--toolbar-icon-filter) !important;
             opacity: 1 !important;
         }}
-        [data-testid="stToolbarActions"] button:hover,
-        [data-testid="stToolbarActions"] a:hover,
-        [data-testid="stMainMenuButton"]:hover {{
+        [data-testid="stHeader"] button:hover,
+        [data-testid="stHeader"] a:hover {{
             background: var(--panel-bg) !important;
             border-radius: 6px;
         }}
