@@ -129,6 +129,7 @@ st.markdown(
             background: var(--selected-bg) !important;
             color: #ffffff !important;
         }}
+        [data-variant="segmented_control"][aria-checked="true"] * {{ color: #ffffff !important; }}
         [data-baseweb="select"] > div, [data-baseweb="input"] > div {{
             background: var(--panel-bg);
             color: var(--app-text);
