@@ -1,0 +1,29 @@
+{
+  "baris_awal": 8500,
+  "baris_setelah_dedup": 8500,
+  "duplikat_dihapus": 0,
+  "timestamp_gagal": 0,
+  "harga_nol_atau_negatif": 39,
+  "anomali_menurut_sumber": 270,
+  "outlier_iqr": 302,
+  "harga_mencurigakan_iqr": 341,
+  "nilai_kosong_per_kolom": {
+    "ID_Pesanan": 0,
+    "Waktu_Transaksi": 0,
+    "Kategori_Menu": 0,
+    "Harga_Pesanan": 0,
+    "Jarak_Kirim_KM": 595,
+    "Waktu_Tunggu_Menit": 0,
+    "Rating_Pelanggan": 1700,
+    "Ulasan_Teks": 1700,
+    "Status_Promo": 0,
+    "Tingkat_Keluhan": 0,
+    "Status_Pesanan": 0,
+    "Anomali_Sumber_Kaggle": 0,
+    "Outlier_IQR": 0,
+    "Harga_Mencurigakan": 0,
+    "Bulan": 0,
+    "Hari": 0,
+    "Jam": 0
+  }
+}

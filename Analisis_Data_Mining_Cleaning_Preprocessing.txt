@@ -1,0 +1,156 @@
+ANALISIS DATA MINING, DATA CLEANING, PREPROCESSING, DAN VISUALISASI
+Dataset: synthetic_fooddelivery_dataset.csv
+
+1. TUJUAN DAN RUANG LINGKUP
+
+Laporan ini menjelaskan proses yang benar-benar diterapkan pada project dashboard Food Delivery. Analisis dilakukan terhadap file CSV Data Card Kaggle yang tersedia di folder project. Dataset pada Data Card secara eksplisit disebut 100% sintetis dan ditujukan untuk edukasi/riset. Karena itu, hasil tidak boleh ditafsirkan sebagai fakta tentang kinerja bisnis food delivery nyata.
+
+Pekerjaan yang sudah dilakukan adalah data understanding, data quality audit, cleaning, preprocessing, exploratory data analysis (EDA), dan visualisasi deskriptif. Project ini BELUM melatih model machine learning, belum melakukan sentiment analysis pada ulasan, dan belum melakukan uji kausal/inferensial. Contoh Random Forest dan use case lain pada Data Card Kaggle adalah contoh/peluang analisis, bukan pekerjaan yang sudah dilakukan project ini.
+
+Kesesuaian dengan PDF tugas: syarat inti cleaning, EDA, minimal enam visualisasi, minimal empat jenis grafik, pertanyaan analisis, label, dan dashboard sudah dipenuhi. Format akhir laporan/presentasi masih menunggu jawaban dosen. Metadata sumber yang tersedia: Kaggle, akun zkyfauzi, https://www.kaggle.com/datasets/zkyfauzi/food-delivery-dataset, diakses 1 Oktober 2026, lisensi yang tercantum pada Data Card CC0 Public Domain.
+
+2. SUMBER DAN PEMAHAMAN DATA
+
+Data Card Kaggle menyebut:
+- 8.500 baris dan 11 kolom.
+- Data simulasi operasional layanan pesan-antar makanan lokal Indonesia.
+- Timestamp sekitar 80% berformat YYYY-MM-DD dan 20% berformat DD/MM/YYYY.
+- Missing jarak kirim dan rating merupakan bagian dari simulasi.
+- Harga memiliki 270 outlier buatan, dari Rp0 sampai Rp8.302.000; rentang yang disebut normal terutama Rp8.000-Rp85.000.
+- Data dirancang dengan relasi tertentu, misalnya jarak-waktu tunggu dan waktu tunggu-rating.
+
+Pemeriksaan CSV mengonfirmasi 8.500 baris dan 11 kolom. Tidak ada ID pesanan duplikat. Ada 595 jarak kirim kosong, 1.700 rating kosong, dan 1.700 ulasan kosong. Distribusi timestamp aktual adalah 6.870 format ISO (80,8%) dan 1.630 format slash (19,2%), mendekati proporsi yang dijelaskan Data Card.
+
+PENTING: Data Card menyebut cakupan temporal Jan-Mar 2024 atau 90 hari, tetapi timestamp dalam CSV aktual merentang dari 1 Januari sampai 3 Desember 2024 dan menempati 117 tanggal kalender. Jumlah baris per bulan juga tidak merata: Jan 2.226, Feb 2.101, Mar 2.184, sedangkan Apr-Des hanya 207-245 baris per bulan. Ini adalah ketidaksesuaian antara dokumentasi dan file yang harus disampaikan sebagai keterbatasan. Timestamp berhasil diparse bukan berarti isi temporalnya sudah tervalidasi.
+Sumber dataset Kaggle: akun zkyfauzi, https://www.kaggle.com/datasets/zkyfauzi/food-delivery-dataset. Diakses 1 Oktober 2026. Lisensi Data Card: CC0 Public Domain.
+
+3. ALUR DATA MINING YANG DILAKUKAN
+
+Alur yang digunakan adalah alur deskriptif yang menyerupai tahap data understanding -> data preparation -> EDA -> visualisasi -> interpretasi:
+
+a. Memahami masalah dan kolom: menganalisis pesanan, kategori menu, harga, waktu tunggu, jarak, rating, promo, keluhan, dan status pesanan.
+b. Memeriksa bentuk data, nama/tipe kolom, contoh baris, missing values, ID duplikat, format tanggal, rentang numerik, dan jumlah kategori.
+c. Membersihkan dan menambahkan fitur turunan yang diperlukan.
+d. Menghitung statistik deskriptif, distribusi kategori/status, agregat bulanan, dan korelasi.
+e. Membuat enam visualisasi interaktif untuk menjawab enam pertanyaan analisis.
+f. Menafsirkan pola dengan mencantumkan batasan data sintetis dan kualitas sumber.
+
+Data mining di sini berarti menemukan pola deskriptif pada data. Ini bukan proses pelatihan model prediksi. Korelasi hanya menunjukkan asosiasi, bukan membuktikan sebab-akibat, walaupun pembuat dataset menyebut relasi tersebut sengaja ditanam dalam data sintetis.
+
+4. DATA CLEANING DAN PREPROCESSING YANG BENAR-BENAR DITERAPKAN
+
+Library utama: pandas.
+
+a. Data sumber tidak ditimpa. Fungsi load_raw_data membaca CSV; clean_data membuat salinan untuk diproses.
+b. Nama kolom dirapikan dengan strip. Spasi awal/akhir di beberapa kolom teks dibuang; string kosong pada kolom teks terkait diubah menjadi missing.
+c. Baris dengan ID_Pesanan duplikat dibuang dengan keep='first'. Pada file aktual tidak ada duplikat, sehingga 8.500 baris tetap ada.
+d. Waktu_Transaksi dikonversi ke datetime dengan format='mixed', dayfirst=True, dan errors='coerce'. Semua timestamp pada file saat ini berhasil diparse. Format tanggal yang berbeda disatukan sebagai tipe waktu, bukan dipakai untuk mengubah tanggal bisnisnya.
+e. Harga_Pesanan, Jarak_Kirim_KM, Waktu_Tunggu_Menit, dan Rating_Pelanggan dikonversi menjadi numerik. Nilai rating di luar 1-5, jarak tidak positif, dan waktu tunggu negatif dijadikan missing.
+f. Status_Promo dinormalisasi ke boolean untuk nilai true/false, 1/0, ya/tidak.
+g. Missing values tidak diimputasi pada alur analisis deskriptif. Grafik memakai observasi yang tersedia untuk variabel terkait; misalnya scatter jarak hanya memakai baris yang memiliki jarak dan waktu tunggu.
+h. Dibuat fitur turunan Bulan, Hari, dan Jam dari timestamp untuk tren dan heatmap.
+i. Dihitung dua flag harga tanpa menghapus baris: aturan sumber Kaggle untuk harga <= 0 atau >Rp500.000, dan kandidat outlier IQR untuk harga positif >Rp85.250. KPI memakai aturan sumber; IQR dipakai untuk analisis sensitivitas.
+
+5. AUDIT HARGA: IQR PROJECT VERSUS ATURAN YANG DIJELASKAN KAGGLE
+
+Perhitungan pada harga positif:
+- Q1 = Rp19.000
+- Q3 = Rp45.500
+- IQR = Q3 - Q1 = Rp26.500
+- Batas atas = Q3 + 1,5 x IQR = Rp85.250
+
+Hasil hitung aktual:
+- 39 baris memiliki harga nol/tidak positif.
+- 302 baris memiliki harga di atas Rp85.250.
+- Implementasi saat ini menandai total 341 baris: 39 harga nol/tidak positif + 302 harga positif di atas batas IQR.
+- Data Card menyebut 270 outlier buatan; hitungan CSV cocok tepat dengan aturan harga nol atau harga di atas Rp500.000: 39 + 231 = 270.
+- Ada 71 harga pada rentang lebih dari Rp85.250 sampai dengan Rp500.000. Nilai ini ditandai oleh IQR, tetapi tidak termasuk hitungan 270 anomali yang secara eksplisit dijelaskan Data Card.
+- Dengan aturan sumber Kaggle, KPI mencakup 7.338 pesanan selesai valid dengan total Rp243.363.500. Angka ini adalah metrik dataset, bukan pendapatan aktual.
+
+Maknanya: angka 341 bukan kesalahan hitung; angka itu adalah hasil gabungan aturan statistik IQR dan harga tidak positif. Namun, angka tersebut berbeda dari 270 anomali yang dinyatakan Data Card. IQR menandai observasi untuk diperiksa, bukan membuktikan bahwa nilai tersebut salah. KPI final memakai aturan sumber Kaggle, sehingga 71 nilai antara Rp85.250-Rp500.000 tetap masuk KPI tetapi tetap tersedia sebagai kandidat untuk analisis sensitivitas.
+
+REKOMENDASI: Simpan dua flag terpisah untuk transparansi:
+1. Anomali yang dinyatakan pembuat data: harga <= 0 atau harga > Rp500.000 (270 baris pada file ini).
+2. Kandidat outlier statistik: harga positif > Rp85.250 menurut pagar IQR (302 baris).
+
+Laporkan total nilai pesanan dengan aturan yang dinyatakan eksplisit, lalu tampilkan analisis sensitivitas jika 71 kandidat tambahan IQR ikut dikecualikan. Jangan menghapus nilai secara otomatis sebelum memeriksa definisi domain dan maksud pembuat data.
+
+6. EDA DAN TEMUAN DATA
+
+- Status: 7.584 Selesai (89,2%), 611 Dibatalkan (7,2%), 305 Refund (3,6%).
+- Kategori: Ayam 3.030 (35,6%), Kopi 2.141 (25,2%), Mie 1.681 (19,8%), Martabak 1.648 (19,4%).
+- Rating rata-rata yang tersedia sekitar 4,18/5; hanya 6.800 baris yang memiliki rating.
+- Waktu tunggu rata-rata sekitar 22,7 menit; Mie tertinggi di antara kategori pada 23,19 menit.
+- Korelasi Pearson jarak dan waktu tunggu sekitar 0,755 pada observasi lengkap. Korelasi rating dan waktu tunggu sekitar -0,263. Nilai-nilai ini konsisten dengan relasi yang ditulis pembuat dataset, tetapi tetap merupakan pola data sintetis, bukan pembuktian sebab-akibat di dunia nyata.
+- Ada 133 pesanan dengan waktu tunggu lebih dari 60 menit. Komposisi status untuk kelompok ini berbeda dari kelompok waktu tunggu <=60 menit; ini layak ditampilkan sebagai pola eksploratif, tetapi bukan kesimpulan kausal.
+- Puncak jumlah pesanan bulanan Jan-Mar disusul jumlah jauh lebih rendah Apr-Des. Karena bertentangan dengan keterangan cakupan Jan-Mar pada Data Card, grafik ini perlu diberi catatan atau dibatasi setelah verifikasi versi file dengan sumber Kaggle.
+- Rata-rata rating, korelasi, dan plot jarak menggunakan data yang tersedia; missing values membuat ukuran sampel analisis tersebut lebih kecil dari 8.500.
+
+7. VISUALISASI DAN TOOLS
+
+Tools visualisasi yang dipakai:
+- Plotly Express untuk line chart, bar chart, box plot, scatter plot, histogram, dan heatmap.
+- Streamlit untuk menyajikan chart dalam dashboard, filter tanggal/kategori/status/promo, KPI, dan tombol unduh.
+- pandas untuk grouping, pivot table, ringkasan statistik, dan menyiapkan data untuk chart.
+
+Plotly Graph Objects hanya diimpor sebagai tipe go.Figure untuk type hint fungsi gaya chart; chart aktual dibuat menggunakan Plotly Express. Moving Average tidak digunakan. Line chart menunjukkan jumlah pesanan per bulan secara langsung.
+
+Enam visualisasi yang dibuat:
+1. Line chart jumlah pesanan per bulan.
+2. Bar chart jumlah pesanan per kategori menu.
+3. Box plot waktu tunggu menurut kategori.
+4. Scatter plot jarak kirim versus waktu tunggu.
+5. Histogram distribusi rating.
+6. Heatmap hari dan jam terhadap rata-rata waktu tunggu.
+
+Alasan memilihnya: tiap bentuk visual cocok dengan pertanyaan berbeda (tren, perbandingan kategori, distribusi, hubungan dua variabel, frekuensi, dan pola dua dimensi). Plotly dipilih karena interaktif dan integrasinya langsung dengan Streamlit; enam jenis grafik memenuhi variasi yang diminta tugas. Streamlit cocok untuk dashboard analisis Python dengan waktu implementasi relatif singkat.
+
+8. APAKAH ADA METODE/TOOLS YANG LEBIH BAIK?
+
+Tidak ada satu metode terbaik untuk semua tujuan. Pilihan harus mengikuti pertanyaan, asumsi, ukuran data, dan cara hasil akan dinilai.
+
+A. Outlier harga
+- IQR sesuai untuk flag awal karena robust terhadap skew dan mudah dijelaskan.
+- Alternatif yang lebih tepat untuk menandai anomali buatan dataset ini adalah aturan domain dari Data Card: harga nol atau >Rp500.000. Aturan itu menghasilkan 270 baris dan cocok dengan keterangan sumber.
+- Pilihan yang paling informatif adalah mempertahankan kedua flag (aturan domain dan IQR), membandingkan dampaknya pada KPI, lalu tidak menghapus data mentah.
+- MAD/modified Z-score dapat menjadi pembanding robust lain. Z-score biasa kurang cocok bila distribusi harga sangat skew dan memiliki ekor ekstrem.
+- IQR global tidak melihat kategori. Jika rentang harga normal tiap kategori memang berbeda, evaluasi juga batas per kategori dengan jumlah sampel memadai.
+
+B. Missing values
+- Membiarkan missing cocok untuk EDA deskriptif ketika nilai tidak diketahui dan imputasi berisiko menciptakan observasi palsu.
+- Untuk model, imputasi median pada fitur numerik plus indikator missing dapat diuji dalam Pipeline scikit-learn; nilai imputasi harus dipelajari dari data latih saja untuk mencegah leakage.
+- Rating kosong tidak sebaiknya otomatis diisi rating 3 jika rating menjadi target atau analisis kepuasan, karena itu mengubah distribusi outcome. Contoh Kaggle mengusulkan rating 3, tetapi itu hanya contoh, bukan aturan netral.
+- Periksa apakah missing bersifat sistematis. Data Card menyebut pengguna yang malas memberi rating dan kegagalan GPS, sehingga missing mungkin tidak acak.
+
+C. Tren waktu
+- Moving Average bukan metode cleaning dan tidak menyelesaikan inkonsistensi kalender.
+- Dengan hanya 12 titik bulanan dan ketidaksesuaian cakupan waktu, rolling average dapat menyamarkan anomali. Verifikasi tanggal dan versi dataset lebih penting.
+- Setelah kalender tervalidasi dan tersedia riwayat lebih panjang, 3-month rolling average dapat ditambahkan sebagai garis bantu, sementara data aktual tetap ditampilkan.
+
+D. Tools visualisasi
+- Matplotlib/Seaborn baik untuk EDA statis dan laporan/notebook; kurang interaktif dibanding dashboard Plotly.
+- Power BI/Tableau/Looker Studio dapat lebih baik jika prioritasnya drag-and-drop, distribusi dashboard ke pengguna bisnis, dan koneksi sumber data, tetapi mengurangi keterulangan analisis berbasis kode atau memerlukan lisensi/konfigurasi.
+- Dash atau Bokeh memberi kontrol aplikasi web lebih besar, namun biasanya membutuhkan lebih banyak kode daripada Streamlit.
+- Untuk tugas Python yang meminta grafik interaktif, Plotly + Streamlit adalah pilihan pragmatis, bukan satu-satunya pilihan terbaik.
+
+9. HAL YANG BELUM DILAKUKAN DAN BATASAN
+
+- Belum dilakukan sentiment analysis/teks ulasan, meskipun dataset berisi Ulasan_Teks.
+- Belum dilakukan klasifikasi Status_Pesanan, regresi waktu tunggu/rating, clustering, atau feature engineering kategori selain fitur kalender.
+- Belum ada split train/test, validasi silang, tuning model, atau evaluasi precision/recall/F1.
+- Jika kelak memprediksi Status_Pesanan, periksa target leakage: rating, keluhan, atau waktu tunggu mungkin dicatat sesudah/bersamaan dengan hasil pesanan. Jangan gunakan fitur yang tidak tersedia pada saat prediksi.
+- Status sangat tidak seimbang (89,2% Selesai). Jika melatih classifier, akurasi saja tidak cukup; gunakan baseline, confusion matrix, precision, recall, F1 per kelas, dan split berdasarkan waktu bila tujuan prediksi masa depan.
+- Data sintetis dan pola temporal yang tidak sesuai Data Card membatasi generalisasi.
+
+10. KESIMPULAN DAN SARAN AKHIR
+
+Project saat ini adalah dashboard EDA/deskriptif yang dapat direproduksi, bukan sistem prediksi. Penggunaan pandas, IQR sebagai flag eksploratif, Plotly Express, dan Streamlit masuk akal untuk tugas ini. Untuk akurasi terhadap metadata pembuat dataset, project sekarang memisahkan 270 anomali menurut aturan sumber, 302 kandidat outlier IQR, dan 341 baris gabungan. Jangan menyebut ketiganya sebagai angka yang sama.
+
+Sebelum finalisasi akademik:
+1. Verifikasi mengapa CSV memuat data sampai Desember sementara Data Card menyebut Jan-Mar/90 hari.
+2. Tampilkan dua definisi flag harga atau tetapkan satu kebijakan yang diterangkan dengan alasan.
+3. Jelaskan bahwa missing tidak diimputasi pada EDA dan sebutkan ukuran sampel tiap temuan.
+4. Pertahankan disclaimer bahwa seluruh pola berasal dari data sintetis.
+5. Metadata URL Kaggle, akun sumber, tanggal akses, dan lisensi sudah dicantumkan di dokumentasi project. Yang masih perlu dikonfirmasi adalah versi file karena Data Card menyebut Jan-Mar/90 hari, sementara CSV aktual berlanjut sampai Desember.
+
+Teknis project: Python, pandas, Plotly Express, Streamlit. Tes unit cleaning yang tersedia mencakup parsing dua format tanggal, deduplikasi/flag harga, serta validasi rating dan jarak.
