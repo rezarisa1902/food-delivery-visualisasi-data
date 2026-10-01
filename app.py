@@ -129,9 +129,9 @@ st.markdown(
         [data-testid="stMainMenuButton"] * {{
             color: var(--app-text) !important;
             opacity: 1 !important;
-            fill: currentColor;
-            stroke: currentColor;
         }}
+        [data-testid="stToolbarActions"] svg,
+        [data-testid="stMainMenuButton"] svg {{ color: var(--app-text) !important; }}
         [data-testid="stToolbarActions"] button:hover,
         [data-testid="stToolbarActions"] a:hover,
         [data-testid="stMainMenuButton"]:hover {{
